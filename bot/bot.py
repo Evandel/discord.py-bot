@@ -12,6 +12,7 @@ status = cycle(['Anime', 'Chinese Cartoons'])
 
 #COMMANDS-----------------------------------------
 #PING
+
 @client.command()
 async def ping(ctx):
     await ctx.channel.send(f'Pong! {round(client.latency * 1000)}ms')
@@ -46,31 +47,29 @@ async def _8ball(ctx, *, question):
                 "Very doubtful."]
     await ctx.send(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send('Invalid command')
+
 #CLEAR MSGS
 @client.command()
-async def clear(ctx, amount=10):
-    await ctx.channel.purge(limit=amount)
+async def clear(ctx, amount: int):
+    await ctx.channel.purge(limit=amount+1)
 
-#COGS
-@client.command()
-async def load(ctx, extension):
-    client.load_extension(f'cogs.{extension}')
 
-@client.command()
-async def unload(ctx, extension):
-    client.unload_extension(f'cogs.{extension}')
-
-#for filename in os.listdir('./cogs'):
-#    if filename.endswith('.py'):
+@clear.error
+async def clear_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Enter the amount of messages you want to clear!')  
 
 #EVENTS--------------------------------------
+
 @client.event
 async def on_ready():
     change_status.start()
-    #await client.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Anime"))
+    await client.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Anime"))
     print('Bot is ready.')
-
-
 
 @tasks.loop(seconds=10)
 async def change_status():
